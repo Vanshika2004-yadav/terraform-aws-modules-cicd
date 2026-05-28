@@ -214,3 +214,6 @@ security_group_id
 This project demonstrates how Terraform modules can be used to create reusable and scalable AWS infrastructure.
 
 It also demonstrates CI/CD automation using GitHub Actions for validating and planning Terraform infrastructure automatically after every code push.
+## CI/CD Demo Test
+
+GitHub Actions pipeline tested successfully.
