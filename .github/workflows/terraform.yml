@@ -1,22 +1,15 @@
 name: Terraform AWS CI/CD
 
 on:
-  push:
-    branches:
-      - main
-
-  pull_request:
-    branches:
-      - main
-
   workflow_dispatch:
     inputs:
       action:
         description: "Choose action"
         required: true
-        default: "destroy"
+        default: "apply"
         type: choice
         options:
+          - apply
           - destroy
 
 jobs:
@@ -50,9 +43,9 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve
 
       - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        if: github.event.inputs.action == 'destroy'
         run: terraform destroy -auto-approve
