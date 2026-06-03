@@ -1,11 +1,12 @@
 module "s3" {
   source      = "./modules/s3"
-  bucket_name = "${var.project_name}-bucket-123456"
+  bucket_name = "${var.project_name}-bucket-${var.bucket_suffix}"
 }
 
 module "security_group" {
-  source  = "./modules/security_group"
-  sg_name = "${var.project_name}-sg"
+  source           = "./modules/security_group"
+  sg_name          = "${var.project_name}-sg"
+  allowed_ssh_cidr = var.allowed_ssh_cidr
 }
 
 module "iam_role" {

@@ -18,6 +18,18 @@ on:
         default: "us-east-1"
         type: string
 
+      backend_bucket:
+        description: "Terraform State S3 Bucket"
+        required: true
+        default: "vanshika-terraform-state-bucket-2026"
+        type: string
+
+      backend_key:
+        description: "Terraform State File Key"
+        required: true
+        default: "terraform.tfstate"
+        type: string
+
       instance_type:
         description: "EC2 Instance Type"
         required: true
@@ -32,6 +44,24 @@ on:
         description: "Project Name"
         required: true
         default: "vanshika-terraform-project"
+        type: string
+
+      ami_id:
+        description: "AMI ID"
+        required: true
+        default: "ami-020cba7c55df1f615"
+        type: string
+
+      allowed_ssh_cidr:
+        description: "Allowed SSH CIDR"
+        required: true
+        default: "YOUR_PUBLIC_IP/32"
+        type: string
+
+      bucket_suffix:
+        description: "Unique S3 bucket suffix"
+        required: true
+        default: "123456"
         type: string
 
 jobs:
@@ -52,8 +82,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.aws_region }}
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Terraform Init with S3 Backend
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ github.event.inputs.backend_bucket }}" \
+            -backend-config="key=${{ github.event.inputs.backend_key }}" \
+            -backend-config="region=${{ github.event.inputs.aws_region }}"
 
       - name: Terraform Format
         run: terraform fmt -check
@@ -65,21 +99,30 @@ jobs:
         run: |
           terraform plan \
             -var="aws_region=${{ github.event.inputs.aws_region }}" \
+            -var="project_name=${{ github.event.inputs.project_name }}" \
+            -var="ami_id=${{ github.event.inputs.ami_id }}" \
             -var="instance_type=${{ github.event.inputs.instance_type }}" \
-            -var="project_name=${{ github.event.inputs.project_name }}"
+            -var="allowed_ssh_cidr=${{ github.event.inputs.allowed_ssh_cidr }}" \
+            -var="bucket_suffix=${{ github.event.inputs.bucket_suffix }}"
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
         run: |
           terraform apply -auto-approve \
             -var="aws_region=${{ github.event.inputs.aws_region }}" \
+            -var="project_name=${{ github.event.inputs.project_name }}" \
+            -var="ami_id=${{ github.event.inputs.ami_id }}" \
             -var="instance_type=${{ github.event.inputs.instance_type }}" \
-            -var="project_name=${{ github.event.inputs.project_name }}"
+            -var="allowed_ssh_cidr=${{ github.event.inputs.allowed_ssh_cidr }}" \
+            -var="bucket_suffix=${{ github.event.inputs.bucket_suffix }}"
 
       - name: Terraform Destroy
         if: github.event.inputs.action == 'destroy'
         run: |
           terraform destroy -auto-approve \
             -var="aws_region=${{ github.event.inputs.aws_region }}" \
+            -var="project_name=${{ github.event.inputs.project_name }}" \
+            -var="ami_id=${{ github.event.inputs.ami_id }}" \
             -var="instance_type=${{ github.event.inputs.instance_type }}" \
-            -var="project_name=${{ github.event.inputs.project_name }}"
+            -var="allowed_ssh_cidr=${{ github.event.inputs.allowed_ssh_cidr }}" \
+            -var="bucket_suffix=${{ github.event.inputs.bucket_suffix }}"
