@@ -4,21 +4,13 @@ data "aws_vpc" "default" {
 
 resource "aws_security_group" "this" {
   name        = var.sg_name
-  description = "Allow SSH and HTTP"
+  description = "Allow SSH only"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
     description = "SSH"
     from_port   = 22
     to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
