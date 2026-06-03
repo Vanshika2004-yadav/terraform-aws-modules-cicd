@@ -4,13 +4,35 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "Choose action"
+        description: "Choose Terraform action"
         required: true
         default: "apply"
         type: choice
         options:
           - apply
           - destroy
+
+      aws_region:
+        description: "AWS Region"
+        required: true
+        default: "us-east-1"
+        type: string
+
+      instance_type:
+        description: "EC2 Instance Type"
+        required: true
+        default: "t3.micro"
+        type: choice
+        options:
+          - t2.micro
+          - t3.micro
+          - t3.small
+
+      project_name:
+        description: "Project Name"
+        required: true
+        default: "vanshika-terraform-project"
+        type: string
 
 jobs:
   terraform:
@@ -28,7 +50,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ github.event.inputs.aws_region }}
 
       - name: Terraform Init
         run: terraform init
@@ -40,12 +62,24 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan
+        run: |
+          terraform plan \
+            -var="aws_region=${{ github.event.inputs.aws_region }}" \
+            -var="instance_type=${{ github.event.inputs.instance_type }}" \
+            -var="project_name=${{ github.event.inputs.project_name }}"
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve
+        run: |
+          terraform apply -auto-approve \
+            -var="aws_region=${{ github.event.inputs.aws_region }}" \
+            -var="instance_type=${{ github.event.inputs.instance_type }}" \
+            -var="project_name=${{ github.event.inputs.project_name }}"
 
       - name: Terraform Destroy
         if: github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve
+        run: |
+          terraform destroy -auto-approve \
+            -var="aws_region=${{ github.event.inputs.aws_region }}" \
+            -var="instance_type=${{ github.event.inputs.instance_type }}" \
+            -var="project_name=${{ github.event.inputs.project_name }}"
