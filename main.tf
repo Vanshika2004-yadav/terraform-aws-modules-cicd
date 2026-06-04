@@ -16,10 +16,14 @@ module "iam_role" {
 }
 
 module "ec2" {
-  source               = "./modules/ec2"
+  source = "./modules/ec2"
+
   ami_id               = var.ami_id
   instance_type        = var.instance_type
+  key_pair_name        = var.key_pair_name
+
   security_group_id    = module.security_group.security_group_id
-  instance_name        = "${var.project_name}-ec2"
   iam_instance_profile = module.iam_role.instance_profile_name
+
+  instance_name        = "${var.project_name}-ec2"
 }

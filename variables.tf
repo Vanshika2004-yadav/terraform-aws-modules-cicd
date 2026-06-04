@@ -27,3 +27,8 @@ variable "bucket_suffix" {
   description = "Unique suffix for S3 bucket name"
   type        = string
 }
+
+variable "key_pair_name" {
+  description = "EC2 Key Pair Name"
+  type        = string
+}
