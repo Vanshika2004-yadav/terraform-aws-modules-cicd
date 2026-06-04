@@ -10,8 +10,17 @@ resource "aws_instance" "this" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install -y awscli
+              set -e
+
+              apt-get update -y
+              apt-get install -y unzip curl
+
+              cd /tmp
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              ./aws/install
+
+              echo "AWS CLI installed successfully" > /tmp/awscli-install-status.txt
               EOF
 
   tags = {
