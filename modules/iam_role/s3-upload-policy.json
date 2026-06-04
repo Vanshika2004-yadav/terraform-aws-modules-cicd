@@ -1,0 +1,12 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "${effect}",
+      "Action": [
+        "${s3_action}"
+      ],
+      "Resource": "arn:aws:s3:::${bucket_name}/*"
+    }
+  ]
+}
