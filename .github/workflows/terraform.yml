@@ -14,7 +14,6 @@ on:
       action:
         description: "Choose Terraform action"
         required: true
-        default: "apply"
         type: choice
         options:
           - apply
@@ -23,60 +22,52 @@ on:
       aws_region:
         description: "AWS Region"
         required: true
-        default: "us-east-1"
 
       backend_bucket:
         description: "Terraform State S3 Bucket"
         required: true
-        default: "vanshika-terraform-state-bucket-2026"
 
       backend_key:
         description: "Terraform State File Key"
         required: true
-        default: "terraform.tfstate"
 
       project_name:
         description: "Project Name"
         required: true
-        default: "vanshika-terraform-project"
 
       ami_id:
         description: "AMI ID"
         required: true
-        default: "ami-020cba7c55df1f615"
 
       instance_type:
         description: "EC2 Instance Type"
         required: true
-        default: "t3.micro"
 
       key_pair_name:
         description: "EC2 Key Pair Name"
         required: true
-        default: "vanshika-key"
 
       allowed_ssh_cidr:
         description: "Allowed SSH CIDR"
         required: true
-        default: "0.0.0.0/0"
 
       bucket_suffix:
         description: "Bucket Suffix"
         required: true
-        default: "123456"
+
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
     env:
-      TF_VAR_aws_region: ${{ github.event.inputs.aws_region || 'us-east-1' }}
-      TF_VAR_project_name: ${{ github.event.inputs.project_name || 'vanshika-terraform-project' }}
-      TF_VAR_ami_id: ${{ github.event.inputs.ami_id || 'ami-020cba7c55df1f615' }}
-      TF_VAR_instance_type: ${{ github.event.inputs.instance_type || 't3.micro' }}
-      TF_VAR_key_pair_name: ${{ github.event.inputs.key_pair_name || 'vanshika-key' }}
-      TF_VAR_allowed_ssh_cidr: ${{ github.event.inputs.allowed_ssh_cidr || '0.0.0.0/0' }}
-      TF_VAR_bucket_suffix: ${{ github.event.inputs.bucket_suffix || '123456' }}
+      TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+      TF_VAR_project_name: ${{ github.event.inputs.project_name  }}
+      TF_VAR_ami_id: ${{ github.event.inputs.ami_id  }}
+      TF_VAR_instance_type: ${{ github.event.inputs.instance_type }}
+      TF_VAR_key_pair_name: ${{ github.event.inputs.key_pair_name }}
+      TF_VAR_allowed_ssh_cidr: ${{ github.event.inputs.allowed_ssh_cidr  }}
+      TF_VAR_bucket_suffix: ${{ github.event.inputs.bucket_suffix  }}
 
     steps:
       - name: Checkout Code
@@ -90,14 +81,14 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+          aws-region: ${{ github.event.inputs.aws_region  }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=${{ github.event.inputs.backend_bucket || 'vanshika-terraform-state-bucket-2026' }}" \
-            -backend-config="key=${{ github.event.inputs.backend_key || 'terraform.tfstate' }}" \
-            -backend-config="region=${{ github.event.inputs.aws_region || 'us-east-1' }}"
+            -backend-config="bucket=${{ github.event.inputs.backend_bucket }}" \
+            -backend-config="key=${{ github.event.inputs.backend_key  }}" \
+            -backend-config="region=${{ github.event.inputs.aws_region  }}"
 
       - name: Terraform Format
         run: terraform fmt -check
