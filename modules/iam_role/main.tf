@@ -10,6 +10,8 @@ resource "aws_iam_policy" "s3_upload_only_policy" {
 
   policy = templatefile("${path.module}/s3-upload-policy.json", {
     bucket_name = var.bucket_name
+    effect      = "Allow"
+    s3_action   = "s3:PutObject"
   })
 }
 
