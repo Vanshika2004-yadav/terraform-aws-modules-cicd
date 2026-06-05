@@ -14,11 +14,46 @@ on:
       action:
         description: "Choose Terraform action"
         required: true
-        default: "apply"
         type: choice
         options:
           - apply
           - destroy
+
+      aws_region:
+        description: "AWS Region"
+        required: true
+
+      backend_bucket:
+        description: "Terraform State S3 Bucket"
+        required: true
+
+      backend_key:
+        description: "Terraform State File Key"
+        required: true
+
+      project_name:
+        description: "Project Name"
+        required: true
+
+      ami_id:
+        description: "AMI ID"
+        required: true
+
+      instance_type:
+        description: "EC2 Instance Type"
+        required: true
+
+      key_pair_name:
+        description: "EC2 Key Pair Name"
+        required: true
+
+      allowed_ssh_cidr:
+        description: "Allowed SSH CIDR"
+        required: true
+
+      bucket_suffix:
+        description: "Bucket Suffix"
+        required: true
 
 permissions:
   id-token: write
@@ -29,13 +64,13 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
-      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
-      TF_VAR_ami_id: ${{ vars.AMI_ID }}
-      TF_VAR_instance_type: ${{ vars.INSTANCE_TYPE }}
-      TF_VAR_key_pair_name: ${{ vars.KEY_PAIR_NAME }}
-      TF_VAR_allowed_ssh_cidr: ${{ vars.ALLOWED_SSH_CIDR }}
-      TF_VAR_bucket_suffix: ${{ vars.BUCKET_SUFFIX }}
+      TF_VAR_aws_region: ${{ github.event.inputs.aws_region }}
+      TF_VAR_project_name: ${{ github.event.inputs.project_name }}
+      TF_VAR_ami_id: ${{ github.event.inputs.ami_id }}
+      TF_VAR_instance_type: ${{ github.event.inputs.instance_type }}
+      TF_VAR_key_pair_name: ${{ github.event.inputs.key_pair_name }}
+      TF_VAR_allowed_ssh_cidr: ${{ github.event.inputs.allowed_ssh_cidr }}
+      TF_VAR_bucket_suffix: ${{ github.event.inputs.bucket_suffix }}
 
     steps:
       - name: Checkout Code
@@ -44,21 +79,21 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Configure AWS Credentials using OIDC
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ github.event.inputs.aws_region }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=${{ vars.BACKEND_BUCKET }}" \
-            -backend-config="key=${{ vars.BACKEND_KEY }}" \
-            -backend-config="region=${{ vars.AWS_REGION }}"
+            -backend-config="bucket=${{ github.event.inputs.backend_bucket }}" \
+            -backend-config="key=${{ github.event.inputs.backend_key }}" \
+            -backend-config="region=${{ github.event.inputs.aws_region }}"
 
       - name: Terraform Format
-        run: terraform fmt -check -recursive
+        run: terraform fmt -check
 
       - name: Terraform Validate
         run: terraform validate

@@ -1,0 +1,7 @@
+aws_region       = "us-east-1"
+project_name     = "vanshika-terraform-project"
+ami_id           = "ami-020cba7c55df1f615"
+instance_type    = "t3.micro"
+key_pair_name    = "vanshika-key"
+allowed_ssh_cidr = "115.245.105.206/32"
+bucket_suffix    = "123456"
