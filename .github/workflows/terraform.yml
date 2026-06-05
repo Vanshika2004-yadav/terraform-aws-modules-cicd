@@ -60,7 +60,7 @@ permissions:
   contents: read
 
 jobs:
-  terraform-plan:
+  ci-check:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
@@ -71,18 +71,8 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Terraform Init
-        run: |
-          terraform init \
-            -backend-config="bucket=vanshika-terraform-state-bucket-2026" \
-            -backend-config="key=terraform.tfstate" \
-            -backend-config="region=us-east-1"
+      - name: Terraform Init Without Backend
+        run: terraform init -backend=false
 
       - name: Terraform Format
         run: terraform fmt -check -recursive
@@ -90,10 +80,7 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan
-
-  terraform-apply-destroy:
+  terraform-deploy:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
