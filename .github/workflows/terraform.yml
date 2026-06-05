@@ -60,7 +60,28 @@ permissions:
   contents: read
 
 jobs:
-  terraform:
+  ci-check:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init Without Backend
+        run: terraform init -backend=false
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  terraform-deploy:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     env:
@@ -93,7 +114,7 @@ jobs:
             -backend-config="region=${{ github.event.inputs.aws_region }}"
 
       - name: Terraform Format
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: terraform validate
@@ -102,9 +123,9 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+        if: github.event.inputs.action == 'apply'
         run: terraform apply -auto-approve
 
       - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        if: github.event.inputs.action == 'destroy'
         run: terraform destroy -auto-approve
